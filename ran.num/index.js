@@ -54,9 +54,6 @@ function checkGuess() {
 }
 
 
-
-
-
 submitGuessButton.addEventListener('click', checkGuess);
 restartGameButton.addEventListener('click', restartGame);
 
