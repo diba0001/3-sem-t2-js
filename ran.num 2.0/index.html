@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ran.num 2.0</title>
+</head>
+
+<body>
+    <main>
+        <article>
+            <div class="index_ran_num">
+                <h1>Dear pc, guess what number I am thinking of ;)</h1>
+                <p id="instructions">Think of a number between 0 and 100, and let the robot guess it!</p>
+                <p id="computerGuessMessage"></p>
+                <button id="tooHighButton" style="display:none;">Too High</button>
+                <button id="tooLowButton" style="display:none;">Too Low</button>
+                <button id="correctButton" style="display:none;">Correct</button>
+                <button id="restartGame" style="display:none;">Restart Game O_o</button>
+                <br>
+                <p id="resultMessage"></p>
+                <br>
+                <p id="remainingAttempts"></p>
+            </div>
+        </article>
+    </main>
+</body>
+
+</html>
+
+<style>
+    body {
+        background-color: whitesmoke;
+    }
+
+    .index_ran_num {
+        align-items: center;
+        display: grid;
+        margin: auto;
+        height: 20pc;
+    }
+
+    h1 {
+        margin-top: 10rem;
+        color: brown;
+        font-size: 2rem;
+        text-align: center;
+        font-family: "Helvetica Neue";
+    }
+
+    button {
+        padding: 5px;
+        margin: 0.5rem auto;
+        display: flex;
+        background-color: brown;
+        border-radius: 5px;
+        color: whitesmoke;
+    }
+
+    p {
+        color: black;
+        font-size: 1rem;
+        margin-top: 1rem;
+        text-align: center;
+        font-family: Helvetica, system-ui;
+        margin-top: 3ch;
+        font-weight: 300;
+    }
+
+    #instructions {
+        font-size: 1rem;
+        font-weight: 300;
+        font-family: "Helvetica Neue";
+        color: black;
+    }
+
+    #remainingAttempts {
+        font-size: 0.75rem;
+        font-weight: 300;
+        font-family: "Helvetica Neue";
+        color: dimgray;
+    }
+
+    #resultMessage {
+        font-size: 1.5rem;
+        font-weight: 300;
+        font-family: "Times New Roman", system-ui;
+        color: grey;
+    }
+</style>
+
+
+<script>
+    let min = 0;
+    let max = 100;
+    let attempts = 10;
+    let computerGuess = Math.floor((min + max) / 2); // første gæt, bliver altid 50
+    let gameOver = false;
+
+    // DOM
+    const computerGuessMessage = document.getElementById('computerGuessMessage');
+    const tooHighButton = document.getElementById('tooHighButton');
+    const tooLowButton = document.getElementById('tooLowButton');
+    const correctButton = document.getElementById('correctButton');
+    const restartGameButton = document.getElementById('restartGame');
+    const resultMessage = document.getElementById('resultMessage');
+    const remainingAttempts = document.getElementById('remainingAttempts');
+
+    // start ved refresh
+    function startGame() {
+        attempts = 10;
+        min = 0;
+        max = 100;
+        computerGuess = Math.floor((min + max) / 2);
+        gameOver = false;
+
+        // start-gæt
+        computerGuessMessage.textContent = `Is it ${computerGuess}?`;
+        remainingAttempts.textContent = `Attempts remaining: ${attempts}`;
+
+        // knapperne
+        tooHighButton.style.display = 'inline-block';
+        tooLowButton.style.display = 'inline-block';
+        correctButton.style.display = 'inline-block';
+        restartGameButton.style.display = 'none';
+        resultMessage.textContent = '';
+    }
+
+    // Computeren skyder igen, alt afhængigt af svar
+    function makeGuess() {
+        if (attempts > 0 && !gameOver) {
+            computerGuess = Math.floor((min + max) / 2); // Computeren bruger matematisk logik til at gætte påny!
+            computerGuessMessage.textContent = `Is it ${computerGuess}?`;
+            remainingAttempts.textContent = `Attempts remaining: ${attempts}`;
+        }
+    }
+
+    // "too high" button
+    tooHighButton.addEventListener('click', function () {
+        if (!gameOver) {
+            max = computerGuess - 1;
+            attempts--;
+            makeGuess();
+            checkGameOver();
+        }
+    });
+
+    // "too high" button
+    tooLowButton.addEventListener('click', function () {
+        if (!gameOver) {
+            min = computerGuess + 1;
+            attempts--;
+            makeGuess();
+            checkGameOver();
+        }
+    });
+
+    // korrekt var button 
+    correctButton.addEventListener('click', function () {
+        if (!gameOver) {
+            resultMessage.textContent = `Yay! The computer guessed it correctly: ${computerGuess}!`;
+            endGame();
+        }
+    });
+
+    // tjek om spillet er ovre
+    function checkGameOver() {
+        if (attempts === 0) {
+            resultMessage.textContent = `Game over! The computer couldn't guess your number.`;
+            endGame();
+        }
+    }
+
+    // slut spillet
+    function endGame() {
+        gameOver = true;
+        tooHighButton.style.display = 'none';
+        tooLowButton.style.display = 'none';
+        correctButton.style.display = 'none';
+        restartGameButton.style.display = 'inline-block';
+    }
+
+    // Restart!
+    restartGameButton.addEventListener('click', function () {
+        startGame();
+    });
+
+    // Start ved refresh
+    startGame();
+
+</script>
