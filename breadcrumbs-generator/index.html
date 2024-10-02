@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breadcrumb Generator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <section>
+        <button id="generateBtn">Generate Breadcrumb</button>
+
+        <nav id="breadcrumb"></nav>
+    </section>
+</body>
+
+</html>
+
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+
+    section {
+        text-align: center;
+        margin: 20rem auto;
+    }
+
+    #breadcrumb {
+        text-align: center;
+    }
+
+    button {
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+
+    button:hover {
+        background-color: #0056b3;
+    }
+
+    nav {
+        display: inline-flex;
+        /* Changed to inline-flex to center properly */
+        align-items: center;
+        font-size: 16px;
+    }
+
+    nav a {
+        text-decoration: none;
+        color: #007bff;
+        margin-right: 5px;
+    }
+
+    nav a:hover {
+        text-decoration: underline;
+    }
+
+    nav span {
+        margin-right: 5px;
+    }
+
+    .separator {
+        margin-right: 5px;
+        color: #6c757d;
+    }
+</style>
+
+<script>
+    const bc = [
+        { name: "Hvidevarer", link: "/hvidevarer" },
+        { name: "Vaskemaskiner", link: "/hvidevarer/vaskemaskiner" },
+        { name: "Bosch", link: "/hvidevarer/vaskemaskiner/bosch/" },
+    ];
+
+    function generateBreadcrumb(breadcrumbData) {
+        const breadcrumbContainer = document.getElementById("breadcrumb");
+
+        breadcrumbContainer.innerHTML = "";
+
+        breadcrumbData.forEach((crumb, index) => {
+            if (index !== 0) {
+                // tilføj adskillelsesepile >>>>>
+                const separator = document.createElement("span");
+                separator.classList.add("separator");
+                separator.textContent = ">";
+                breadcrumbContainer.appendChild(separator);
+            }
+
+            if (index < breadcrumbData.length - 1) {
+                // tilføj clickable liiinks
+                const link = document.createElement("a");
+                link.href = crumb.link;
+                link.textContent = crumb.name;
+                breadcrumbContainer.appendChild(link);
+            } else {
+                // sidste krumme er ikkke link, men tekst
+                const current = document.createElement("span");
+                current.textContent = crumb.name;
+                breadcrumbContainer.appendChild(current);
+            }
+        });
+    }
+
+    // eventlistener
+    document.getElementById("generateBtn").addEventListener("click", () => {
+        generateBreadcrumb(bc);
+    });
+
+
+</script>
