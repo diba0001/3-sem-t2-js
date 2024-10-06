@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Switcher</title>
+    <script type="module" src="js.js"></script>
+</head>
+
+<body>
+    <div class="switcher">
+        <label for="language">Choose Language: </label>
+        <select id="language">
+            <option value="da">Danish</option>
+            <option value="de">German</option>
+        </select>
+    </div>
+
+    <header class="header">UDSKIFTES</header>
+    <p></p>
+    <div class="footer">UDSKIFTES</div>
+</body>
+<style>
+    html,
+    body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+    }
+
+
+    body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        background-color: #f0f0f0;
+
+    }
+
+
+    .switcher {
+        margin-bottom: 1rem;
+    }
+
+
+    .header,
+    .footer {
+        font-size: 1.5rem;
+        margin: 1rem 0;
+    }
+
+
+    select {
+        padding: 0.5rem;
+        font-size: 1rem;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        outline: none;
+    }
+
+
+    @media (max-width: 600px) {
+        body {
+            padding: 1rem;
+        }
+    }
+</style>
+
+</html>
