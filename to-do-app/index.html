@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-do webapp</title>
+    <style>
+        /* simpel styling af html */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Helvetica Neue", sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: lightgrey;
+        }
+
+        img {
+            width: 33px;
+            height: auto;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+        }
+
+        .boxLarge {
+            padding: 20px;
+            background-color: slategray;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .boxSmall {
+            padding: 20px;
+            background-color: dimgray;
+            color: white;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .date-container p {
+            font-size: 0.8rem;
+            text-align: left;
+            font-weight: 200;
+            margin-top: 15px;
+        }
+
+        .small-box {
+            width: 100%;
+            aspect-ratio: 1;
+            background-color: grey;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .small-box.disabled {
+            cursor: default;
+            opacity: 0.5;
+        }
+
+        .reminder-input {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #reminder-title,
+        #reminder-details {
+            flex: 1;
+            padding: 5px;
+        }
+
+        button {
+            padding: 5px 10px;
+            cursor: pointer;
+            background-color: whitesmoke;
+            border: none;
+        }
+
+        button:hover {
+            background-color: darkgray;
+        }
+
+        ul {
+            list-style-type: none;
+            margin-top: 8px;
+            padding: 0;
+        }
+
+        li {
+            background-color: lightgray;
+            padding: 10px;
+            margin: 8px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            min-width: 135px;
+        }
+
+        li p {
+            font-size: 16px;
+            color: darkslategray;
+            font-weight: 300;
+        }
+
+        li div {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 400;
+            color: black;
+            font-size: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .boxLarge,
+            .boxSmall {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="boxLarge main-box">
+            <h1>Reminders</h1>
+            <div class="reminder-input">
+                <input type="text" id="reminder-title" placeholder="Name the reminder">
+                <input type="text" id="reminder-details" placeholder="Add details (e.g., grocery list, location etc.)">
+                <button onclick="addReminder()">Add</button>
+            </div>
+
+            <ul id="reminder-list"></ul>
+        </div>
+        <div class="boxSmall secondary-box">
+            <h1>Overview</h1>
+            <div class="date-container">
+                <p id="date-time"></p>
+            </div>
+
+            <div id="archived-box" class="small-box disabled">
+                <p>Archived (<span id="archived-count">0</span>)</p>
+                <img src="cld-server-svgrepo-com.svg" alt="">
+                <ul id="archived-list" class="hidden"></ul>
+            </div>
+            <div class="small-box disabled">
+                <p>Monthly</p>
+                <img src="db-table-svgrepo-com.svg" alt="">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Henter eksisterende reminders fra localStorage eller opretter tomme arrays, hvis ikke der findes data
+        let reminders = JSON.parse(localStorage.getItem('reminders')) || [];
+        let archivedReminders = JSON.parse(localStorage.getItem('archivedReminders')) || [];
+
+        // Opdaterer dato og tid på siden, ned til minuttet
+        function updateDateTime() {
+            const dateTimeElement = document.getElementById('date-time');
+            const now = new Date();
+            const options = {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+            };
+            dateTimeElement.textContent = now.toLocaleString('en-US', options);
+        }
+
+        // Gemmer reminders og arkiverede reminders i localStorage, så de er der ved refresh
+        function saveToLocalStorage() {
+            localStorage.setItem('reminders', JSON.stringify(reminders));
+            localStorage.setItem('archivedReminders', JSON.stringify(archivedReminders));
+        }
+
+        // Tilføjer en ny reminder til listen og gemmer den i localStorage
+        function addReminder() {
+            const titleInput = document.getElementById('reminder-title');
+            const detailsInput = document.getElementById('reminder-details');
+            const title = titleInput.value.trim();
+            const details = detailsInput.value.trim();
+
+            // Hvis inputfelterne ikke er tomme, tilføjes der en ny reminder
+            if (title && details) {
+                const newReminder = {
+                    id: Date.now(), // Genererer unik ID baseret på timestamp
+                    title: title,
+                    details: details
+                };
+                reminders.push(newReminder);
+                titleInput.value = ''; // Tømmer inputfelterne
+                detailsInput.value = '';
+                saveToLocalStorage(); // Gemmer reminders i localStorage
+                displayReminders(); // Opdaterer listen med reminders på skærmen
+            }
+        }
+
+        // Arkiverer en reminder - hvis klikket
+        function archiveReminder(index) {
+            const archivedReminder = reminders.splice(index, 1)[0]; // Fjerner reminder fra listen
+            archivedReminders.push(archivedReminder); // Tilføjer den til arkivlisten
+            saveToLocalStorage(); // Gemmer begge lister i localStorage
+            displayReminders(); // Opdaterer visningen af reminders
+            displayArchivedCount(); // Opdaterer mængden for arkiverede reminders
+        }
+
+        // Sletter en arkiveret reminder fra arkivlisten
+        function deleteArchivedReminder(index) {
+            archivedReminders.splice(index, 1); // Fjerner reminder fra arkivlisten
+            saveToLocalStorage(); // Gemmer opdaterede lister
+            displayArchivedCount(); // Opdaterer tælleren for arkiverede reminders
+            displayArchivedReminders(); // Opdaterer visningen af arkiverede reminders
+        }
+
+        // Viser alle reminders på skærmen
+        function displayReminders() {
+            const reminderList = document.getElementById('reminder-list');
+            reminderList.innerHTML = ''; // Tømmer den eksisterende reminder-liste
+
+            reminders.forEach((reminder, index) => {
+                const listItem = document.createElement('li');
+                const title = document.createElement('div');
+                const details = document.createElement('p');
+
+                title.textContent = reminder.title;
+                details.textContent = reminder.details;
+
+                // Opretter en "Archive"-knap for hver reminder
+                const archiveButton = document.createElement('button');
+                archiveButton.textContent = 'Archive';
+                archiveButton.onclick = () => archiveReminder(index); // Tilføjer arkiveringsfunktion
+
+                const header = document.createElement('div');
+                header.appendChild(title);
+                header.appendChild(archiveButton);
+
+                listItem.appendChild(header); // Tilføjer overskrift (title + knap)
+                listItem.appendChild(details); // Tilføjer detaljerne (grocery list)
+                reminderList.appendChild(listItem); // Tilføjer listen til DOM
+            });
+        }
+
+        // Opdaterer mængden af arkiverede reminders
+        function displayArchivedCount() {
+            const archivedBox = document.getElementById('archived-box');
+            const archivedCount = document.getElementById('archived-count');
+            archivedCount.textContent = archivedReminders.length; // Viser antal arkiverede reminders
+
+            // Aktiverer eller deaktiverer arkiv-sektionen afhængigt af antallet af arkiverede reminders
+            if (archivedReminders.length > 0) {
+                archivedBox.classList.remove('disabled');
+                archivedBox.onclick = toggleArchivedList; // Aktiverer klikfunktion for arkivlisten
+            } else {
+                archivedBox.classList.add('disabled'); // Deaktiverer klikfunktion, hvis der ingen arkiverede reminders er
+                archivedBox.onclick = null;
+            }
+        }
+
+        // Viser eller skjuler arkivlisten
+        function toggleArchivedList() {
+            const archivedList = document.getElementById('archived-list');
+            archivedList.classList.toggle('hidden'); // Skifter synlighed på arkivlisten
+            displayArchivedReminders(); // Opdaterer visningen af arkiverede reminders
+        }
+
+        // Viser arkiverede reminders
+        function displayArchivedReminders() {
+            const archivedList = document.getElementById('archived-list');
+            archivedList.innerHTML = ''; // Tømmer den eksisterende arkiv-liste
+
+            archivedReminders.forEach((reminder, index) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = reminder.title; // Viser kun titlen for arkiverede reminders
+
+                // Opretter en "Delete"-knap for hver arkiveret reminder
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.onclick = () => deleteArchivedReminder(index); // Tilføjer slette-funktion
+
+                listItem.appendChild(deleteButton); // Tilføjer knappen til listen
+                archivedList.appendChild(listItem); // Tilføjer til arkiv-listen
+            });
+        }
+
+        // Kører funktionerne for at vise reminders og arkiverede reminders ved indlæsning
+        displayReminders();
+        displayArchivedCount();
+        updateDateTime();
+        setInterval(updateDateTime, 60000); // Opdaterer tiden hver minut
+    </script>
+</body>
+
+</html>

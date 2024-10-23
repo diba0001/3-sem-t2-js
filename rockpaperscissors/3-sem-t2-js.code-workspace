@@ -3,10 +3,6 @@
 		{
 			"name": "3-sem-t2-js",
 			"path": ".."
-		},
-		{
-			"name": "language_switcher",
-			"path": "../../../../../Downloads/language_switcher"
 		}
 	],
 	"settings": {
