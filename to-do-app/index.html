@@ -134,6 +134,21 @@
             display: none;
         }
 
+        /* Tilføjet for at placere "Archive" og "Delete" knapper ved siden af hinanden */
+        .reminder-header {
+            display: flex;
+            justify-content: space-between;
+            /* Placerer titel og knapper på hver sin side */
+            align-items: center;
+            /* Vertikal centrering */
+        }
+
+        .button-container {
+            display: flex;
+            gap: 10px;
+            /* Afstand mellem knapperne */
+        }
+
         @media (max-width: 768px) {
             .container {
                 grid-template-columns: 1fr;
@@ -233,12 +248,11 @@
             displayArchivedCount(); // Opdaterer mængden for arkiverede reminders
         }
 
-        // Sletter en arkiveret reminder fra arkivlisten
-        function deleteArchivedReminder(index) {
-            archivedReminders.splice(index, 1); // Fjerner reminder fra arkivlisten
-            saveToLocalStorage(); // Gemmer opdaterede lister
-            displayArchivedCount(); // Opdaterer tælleren for arkiverede reminders
-            displayArchivedReminders(); // Opdaterer visningen af arkiverede reminders
+        // Sletter en reminder fra listen (ikke arkiveret)
+        function deleteReminder(index) {
+            reminders.splice(index, 1); // Fjerner reminder fra listen
+            saveToLocalStorage(); // Gemmer opdaterede reminders
+            displayReminders(); // Opdaterer visningen af reminders
         }
 
         // Viser alle reminders på skærmen
@@ -259,63 +273,43 @@
                 archiveButton.textContent = 'Archive';
                 archiveButton.onclick = () => archiveReminder(index); // Tilføjer arkiveringsfunktion
 
-                const header = document.createElement('div');
-                header.appendChild(title);
-                header.appendChild(archiveButton);
+                // Ny "Delete"-knap til at slette en reminder
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.onclick = () => deleteReminder(index); // Tilføjer slette-funktion
 
-                listItem.appendChild(header); // Tilføjer overskrift (title + knap)
+                const header = document.createElement('div');
+                header.classList.add('reminder-header'); // Tilføjer en klasse for at style headeren
+
+                header.appendChild(title);
+
+                // Opretter en flex-container til begge knapperne
+                const buttonContainer = document.createElement('div');
+                buttonContainer.classList.add('button-container'); // Tilføjer en klasse til styling
+                buttonContainer.appendChild(archiveButton);
+                buttonContainer.appendChild(deleteButton);
+
+                header.appendChild(buttonContainer); // Tilføjer knap-containeren til headeren
+
+                listItem.appendChild(header); // Tilføjer overskrift (title + knapper)
                 listItem.appendChild(details); // Tilføjer detaljerne (grocery list)
                 reminderList.appendChild(listItem); // Tilføjer listen til DOM
             });
         }
 
-        // Opdaterer mængden af arkiverede reminders
+        // Opdaterer antallet af arkiverede reminders
         function displayArchivedCount() {
-            const archivedBox = document.getElementById('archived-box');
             const archivedCount = document.getElementById('archived-count');
-            archivedCount.textContent = archivedReminders.length; // Viser antal arkiverede reminders
-
-            // Aktiverer eller deaktiverer arkiv-sektionen afhængigt af antallet af arkiverede reminders
-            if (archivedReminders.length > 0) {
-                archivedBox.classList.remove('disabled');
-                archivedBox.onclick = toggleArchivedList; // Aktiverer klikfunktion for arkivlisten
-            } else {
-                archivedBox.classList.add('disabled'); // Deaktiverer klikfunktion, hvis der ingen arkiverede reminders er
-                archivedBox.onclick = null;
-            }
+            archivedCount.textContent = archivedReminders.length;
         }
 
-        // Viser eller skjuler arkivlisten
-        function toggleArchivedList() {
-            const archivedList = document.getElementById('archived-list');
-            archivedList.classList.toggle('hidden'); // Skifter synlighed på arkivlisten
-            displayArchivedReminders(); // Opdaterer visningen af arkiverede reminders
-        }
-
-        // Viser arkiverede reminders
-        function displayArchivedReminders() {
-            const archivedList = document.getElementById('archived-list');
-            archivedList.innerHTML = ''; // Tømmer den eksisterende arkiv-liste
-
-            archivedReminders.forEach((reminder, index) => {
-                const listItem = document.createElement('li');
-                listItem.textContent = reminder.title; // Viser kun titlen for arkiverede reminders
-
-                // Opretter en "Delete"-knap for hver arkiveret reminder
-                const deleteButton = document.createElement('button');
-                deleteButton.textContent = 'Delete';
-                deleteButton.onclick = () => deleteArchivedReminder(index); // Tilføjer slette-funktion
-
-                listItem.appendChild(deleteButton); // Tilføjer knappen til listen
-                archivedList.appendChild(listItem); // Tilføjer til arkiv-listen
-            });
-        }
-
-        // Kører funktionerne for at vise reminders og arkiverede reminders ved indlæsning
-        displayReminders();
-        displayArchivedCount();
-        updateDateTime();
-        setInterval(updateDateTime, 60000); // Opdaterer tiden hver minut
+        // Opdaterer dato/tid når siden indlæses, og viser reminders og arkiverede count
+        document.addEventListener('DOMContentLoaded', () => {
+            updateDateTime();
+            displayReminders();
+            displayArchivedCount();
+            setInterval(updateDateTime, 60000); // Opdaterer tiden hvert minut
+        });
     </script>
 </body>
 
