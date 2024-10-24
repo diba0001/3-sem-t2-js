@@ -16,10 +16,24 @@
         body {
             font-family: "Helvetica Neue", sans-serif;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            justify-content: flex-start;
             align-items: center;
             height: 100vh;
             background-color: lightgrey;
+        }
+
+
+        #webapp_h1 {
+            color: dimgray;
+            font-size: clamp(1rem, 10vw, 2rem);
+            text-align: center;
+            margin-top: 5rem;
+            margin-bottom: 1rem;
+
+            @media screen and (max-width: 900px) {
+                font-size: 1.3rem;
+            }
         }
 
         img {
@@ -163,6 +177,9 @@
 </head>
 
 <body>
+    <div id="webapp_h1">
+        <h1>A simple to-do webapp</h1>
+    </div>
     <div class="container">
         <div class="boxLarge main-box">
             <h1>Reminders</h1>
